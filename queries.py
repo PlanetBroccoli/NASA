@@ -11,26 +11,58 @@ mydb = mysql.connector.connect(
 mycursor = mydb.cursor()
 
 
+def test():
+    mycursor.execute("SELECT * FROM lol")
+    return mycursor.fetchall()
+
+
 def getLatestWeather(city, district):
     try:
+        condition = "`city` = %s AND `district` = %s `humidity` != "" AND `temperature` != "" AND `pressure` != "" AND `wind_speed` != "" AND `rain` != """ % (
+            city, district)
+
         mycursor.execute(
-            "SELECT `humidity`, `temperature`, `pressure`, `wind_speed`, `rain` FROM weather WHERE `city` = %s AND `district` = %s `humidity` != "" AND `temperature` != "" AND `pressure` != "" AND `wind_speed` != "" AND `rain` != "" ORDER BY `id` DESC LIMIT 1" % (city, district))
+            "SELECT `humidity`, `temperature`, `pressure`, `wind_speed`, `rain` FROM weather WHERE %s ORDER BY `id` DESC LIMIT 1" % (condition))
 
         # Humidity, Temperature, Pressure, Wind Speed, Rainfall
-        return mycursor.fetchone()
-
-    except Exception as e:
-        print(e)
-
-
-def getPopulationData(city, district):
-    try:
-        mycursor.execute(
-            "SELECT `males`, `females`, `area`, `type` FROM districts WHERE `city` = %s AND `district` = %s" % (city, district))
-
-        # Males, Females, Area, Type
+        data_labels = ["humidity", "temperature",
+                       "pressure", "wind_speed", "rain"]
         data = mycursor.fetchone()
-        pop = int(data[0]) + int(data[1])
+
+        return generateDictionary(data, data_labels)
 
     except Exception as e:
         print(e)
+
+
+def getPopulationData(city, district, language="en"):
+    try:
+        district_languages = {"en": "district_en", "zh": "district"}
+        city_languages = {"en": "city_en", "zh": "city"}
+
+        district_lang, city_lang = district_languages[language], city_languages[language]
+
+        condition = "`%s` LIKE '%s' AND `%s` LIKE '%s'" % (
+            city_lang, city, district_lang, district)
+
+        mycursor.execute(
+            "SELECT `population`, `males`, `females`, `area`, `density`, `type` FROM districts WHERE %s" % (condition))
+
+        # Population, Males, Females, Area, Population Density, Type
+        data_labels = ["population", "males",
+                       "females", "area", "density", "type"]
+        data = mycursor.fetchone()
+
+        return generateDictionary(data, data_labels)
+
+    except Exception as e:
+        print(e)
+
+
+def generateDictionary(data, labels):
+    output = {}
+
+    for i in range(len(labels)):
+        output[labels[i]] = data[i]
+
+    return output
