@@ -103,8 +103,6 @@ def getWeeklyData(year, week, station):
         data_labels = ["id", "year", "month", "week", "day_of_year",
                        "station_name", "pressure", "max_pressure", "min_pressure", "temperature", "max_temperature", "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation", "sunshine", "max_uv", "cloud"]
         data = mycursor.fetchall()
-        for i in data:
-            print(i)
         return generateDictionary(data, data_labels)
     except Exception as e:
         print(e)
