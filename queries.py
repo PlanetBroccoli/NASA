@@ -20,18 +20,20 @@ def test():
     return mycursor.fetchall()
 
 
-def getLatestWeather(city, district):
+def getLatestWeather(city, district, language="en"):
     try:
-        condition = "`city` = %s AND `district` = %s `humidity` != "" AND `temperature` != "" AND `pressure` != "" AND `wind_speed` != "" AND `rain` != """ % (
-            city, district)
+        station = getStation(city, district, language)["station"]
+        condition = "`station_name` = '%s'" % (station)
+        database = "weather"
+        query = "SELECT `pressure`, `max_pressure`, `min_pressure`, `temperature`, `max_temperature`, `min_temperature`, `humidity`, `min_humidity`, `wind_speed`, `max_gust`, `precipitation` FROM %s WHERE %s ORDER BY `id` DESC LIMIT 1" % (
+            database, condition)
 
-        mycursor.execute(
-            "SELECT `humidity`, `temperature`, `pressure`, `wind_speed`, `rain` FROM weather WHERE %s ORDER BY `id` DESC LIMIT 1" % (condition))
+        mycursor.execute(query)
 
         # Humidity, Temperature, Pressure, Wind Speed, Rainfall
-        data_labels = ["humidity", "temperature",
-                       "pressure", "wind_speed", "rain"]
-        data = mycursor.fetchone()
+        data_labels = ["pressure", "max_pressure", "min_pressure", "temperature", "max_temperature",
+                       "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation"]
+        data = [mycursor.fetchone()]
 
         return generateDictionary(data, data_labels)
 
@@ -45,17 +47,19 @@ def getPopulationData(city, district, language="en"):
         city_languages = {"en": "city_en", "zh": "city"}
 
         district_lang, city_lang = district_languages[language], city_languages[language]
-
+        database = "districts"
         condition = "`%s` LIKE '%s' AND `%s` LIKE '%s'" % (
             city_lang, city, district_lang, district)
 
-        mycursor.execute(
-            "SELECT `population`, `males`, `females`, `area`, `density`, `type` FROM districts WHERE %s" % (condition))
+        query = "SELECT `population`, `males`, `females`, `area`, `density`, `type` FROM %s WHERE %s" % (
+            database, condition)
+
+        mycursor.execute(query)
 
         # Population, Males, Females, Area, Population Density, Type
         data_labels = ["population", "males",
                        "females", "area", "density", "type"]
-        data = mycursor.fetchone()
+        data = mycursor.fetchall()
 
         return generateDictionary(data, data_labels)
 
@@ -80,7 +84,7 @@ def getStation(city, district, language="en"):
 
         # Station
         data_labels = ["station"]
-        data = mycursor.fetchone()
+        data = mycursor.fetchall()
 
         return generateDictionary(data, data_labels)
 
@@ -88,7 +92,7 @@ def getStation(city, district, language="en"):
         print(e)
 
 
-def getWeeklyData(year, week, station):
+def getDataForTheWeek(year, week, station):
     try:
         year_column = "year"
         week_column = "week"
@@ -108,11 +112,33 @@ def getWeeklyData(year, week, station):
         print(e)
 
 
+def getWeeklyData(year, week, station):
+    try:
+        year_column = "year"
+        week_column = "week"
+        station_column = "station_name"
+        database = "week_weather"
+
+        condition = "`%s` = '%s' AND `%s` = '%s' AND `%s` LIKE '%s'" % (
+            year_column, year, week_column, week, station_column, station)
+
+        mycursor.execute("SELECT * FROM %s WHERE %s" % (database, condition))
+        data_labels = ["id", "year", "week", "station_name", "pressure", "max_pressure", "min_pressure", "temperature", "max_temperature",
+                       "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation", "sunshine", "max_uv", "cloud"]
+        data = mycursor.fetchall()
+
+        return generateDictionary(data, data_labels)
+
+    except Exception as e:
+        print(e)
+
+
 def generateDictionary(data, labels):
     if len(data) == 1:
         output = {}
+
         for i in range(len(labels)):
-            output[labels[i]] = data[i]
+            output[labels[i]] = data[0][i]
         return output
 
     else:

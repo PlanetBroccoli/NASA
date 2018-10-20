@@ -11,23 +11,13 @@ def main():
     return render_template("index.html")
 
 
-@app.route("/calculate", methods=["GET"])
-def calc():
-    humidity = request.args.get("h")
-    temperature = request.args.get("t")
-    pressure = request.args.get("p")
-    wind_speed = request.args.get("w")
-    rain = request.args.get("r")
-    population = request.args.get("pop")
-    area = request.args.get("a")
+@app.route("/predictcoords", methods=["GET"])
+def predict_coords():
+    try:
+        lat, lon = request.args.get("lat"), request.args.get("lon")
 
-    attributes = [pressure, temperature, humidity,
-                  wind_speed, rain, population, area]
-    prediction_matrix = [0, 0, 0, 0, 0]
-
-    prob = calculate.calculateProbability(*attributes)
-
-    return jsonify(probability=prob)
+    except Exception as e:
+        print(e)
 
 
 @app.route("/predict", methods=["GET"])
@@ -36,13 +26,13 @@ def predict():
         city = request.args.get("city").lower()
         district = request.args.get("district").lower()
         weather_data = queries.getLatestWeather(city, district)
+        print(weather_data)
         population_data = queries.getPopulationData(city, district)
+        print(population_data)
 
-        h, t, p, w, r = weather_data["humidity"], weather_data["temperature"], weather_data[
-            "pressure"], weather_data["wind_speed"], weather_data["rain"]
-        prob = 0.2
+        prob = calculate.calculateProbability(weather_data)
 
-        return jsonify(time=datetime.datetime.now(), city=city, district=district, population=population_data["population"], males=population_data["males"], probability=prob)
+        return jsonify(time=datetime.datetime.now(), city=city, district=district, probability=prob)
 
     except Exception as e:
         print(e)

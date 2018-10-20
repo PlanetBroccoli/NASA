@@ -1,24 +1,23 @@
 import numpy as np
 import statistics
+import math
 
 
-def calculateProbability(h, t, p, w, r, pop, a):
-    '''
-    h: Relative humidity
-    t: Temperature
-    p: Pressure
-    w: Average wind speed
-    r: Precipitation (rain)
-    pop: Population
-    a: Surface Area
-    '''
+def calculateProbability(params):
+    try:
+        values = [i for i in params.values()]
 
-    parameters = [h, t, p, w, r, pop, a]
+        # This will be our calculation from logistic regression in R
+        prediction_matrix = [0.07331, -0.060672, -0.019904, 0.143931, -
+                             0.179934, 0.139233, 0.039394, 0.036541, 0.38578, 0.003065, -0.013117]
 
-    # This will be our calculation from logistic regression in R
-    prediction_matrix = np.zeros(len(parameters))
+        y = np.dot(prediction_matrix, values)
 
-    return np.dot(parameters, prediction_matrix)
+        # Probability of being High-Risk
+        return math.exp(y) / (1 + math.exp(y))
+
+    except Exception as e:
+        print(e)
 
 
 def calculateWeeklyData(ld):
