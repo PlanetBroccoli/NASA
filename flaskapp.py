@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, jsonify
+from flask_cors import CORS
 import queries
 import calculate
 import datetime
 import json
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route("/", methods=["GET"])
@@ -15,16 +17,17 @@ def main():
 @app.route("/predictall", methods=["GET"])
 def predict_all():
     all_coords = queries.getAllLocations()
+    all_stations = queries.getAllStations()
     output = []
-
     id = 0
-    for coord in all_coords:
-        lat, lon = coord[0], coord[1]
-        city, district, prob = calculate.calculateCoords(lat, lon)
+    for i in range(len(all_coords)):
+        lat, lon = all_coords[i]
+        station = all_stations[i]
+        weather_data = queries.getLatestWeatherStation(station)
+        prob = calculate.calculateProbability(weather_data)
         output.append(
             {"lat": lat, "lon": lon, "id": id, "probability": prob})
         id += 1
-        print(output)
 
     return jsonify(content=output)
 
@@ -35,7 +38,7 @@ def predict_coords():
         lat, lon = request.args.get("lat"), request.args.get("lon")
         city, district, prob = calculate.calculateCoords(lat, lon)
 
-        return jsonify(time=datetime.datetime.now(), lat=lat, lon=lon, city=city, district=district, probability=prob)
+        return jsonify(time=datetime.datetime.now(), lat=lat, lon=lon, probability=prob)
 
     except Exception as e:
         print(e)

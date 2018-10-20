@@ -15,8 +15,9 @@ def calculateCoords(lat, lon):
 
 def calculateProbability(params):
     try:
-        values = [i if i > -50 else 0 for i in params.values()]
-
+        values = [params["pressure"], params["temperature"], params["max_temperature"], params["min_temperature"], params["humidity"], params["wind_speed"], params["max_gust"], params["precipitation"]]
+        values = [i if i > -99 else 0 for i in values]
+        print (values)
         # This will be our calculation from logistic regression in R
         # Without intercept
         prediction_matrix = [-0.006946, 0.146294, -0.224428,
