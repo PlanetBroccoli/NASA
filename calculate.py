@@ -88,10 +88,10 @@ def calculateWeeklyData(ld):
         w = statistics.mean([d["wind_speed"] for d in ld])
         g = max([d["max_gust"] for d in ld])
         r = statistics.mean([d["precipitation"] for d in ld])
-        s = statistics.mean([d["sunshine"] for d in ld])
-        max_uv = max([d["max_uv"] for d in ld])
-        c = statistics.mean([d["cloud"] for d in ld])
-        return p, max_p, min_p, t, max_t, min_t, h, min_h, w, g, r, s, max_uv, c
+        #s = statistics.mean([d["sunshine"] for d in ld])
+        #max_uv = max([d["max_uv"] for d in ld])
+        #c = statistics.mean([d["cloud"] for d in ld])
+        return p, max_p, min_p, t, max_t, min_t, h, min_h, w, g, r
 
     except Exception as e:
         print(e)
