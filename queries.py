@@ -116,13 +116,12 @@ def getStation(city, district, language="en"):
         condition = "`%s` LIKE '%s' AND `%s` LIKE '%s'" % (
             city_lang, city, district_lang, district)
 
-        mycursor.execute(
-            "SELECT `station` FROM %s WHERE %s" % (database, condition))
+        query = "SELECT `station` FROM %s WHERE %s" % (database, condition)
+        mycursor.execute(query)
 
         # Station
         data_labels = ["station"]
         data = mycursor.fetchall()
-
         return generateDictionary(data, data_labels)
 
     except Exception as e:
@@ -142,7 +141,7 @@ def getDataForTheWeek(year, week, station):
         mycursor.execute("SELECT * FROM %s WHERE %s" % (database, condition))
 
         data_labels = ["id", "year", "month", "week", "day_of_year",
-                       "station_name", "pressure", "max_pressure", "min_pressure", "temperature", "max_temperature", "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation", "sunshine", "max_uv", "cloud"]
+                       "station_name", "pressure", "max_pressure", "min_pressure", "temperature", "max_temperature", "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation"]
         data = mycursor.fetchall()
         return generateDictionary(data, data_labels)
     except Exception as e:
@@ -158,12 +157,12 @@ def getWeeklyData(year, week, station):
 
         condition = "`%s` = '%s' AND `%s` = '%s' AND `%s` LIKE '%s'" % (
             year_column, year, week_column, week, station_column, station)
-
-        mycursor.execute("SELECT * FROM %s WHERE %s" % (database, condition))
+        query = "SELECT * FROM %s WHERE %s" % (database, condition)
+        mycursor.execute(query)
+        
         data_labels = ["id", "year", "week", "station_name", "pressure", "max_pressure", "min_pressure", "temperature", "max_temperature",
-                       "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation", "sunshine", "max_uv", "cloud"]
+                       "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation"]
         data = mycursor.fetchall()
-
         return generateDictionary(data, data_labels)
 
     except Exception as e:
@@ -191,19 +190,25 @@ def saveData(data):
 
 
 def generateDictionary(data, labels):
-    if len(data) == 1:
-        output = {}
-
-        for i in range(len(labels)):
-            output[labels[i]] = data[0][i]
-        return output
-
-    else:
-        output_list = []
-        for elem in data:
+    try:
+        if len(data) == 1:
             output = {}
-            for i in range(len(labels)):
-                output[labels[i]] = elem[i]
 
-            output_list.append(output)
-        return output_list
+            for i in range(len(labels)):
+                output[labels[i]] = data[0][i]
+            return output
+
+        else:
+            output_list = []
+            for elem in data:
+                output = {}
+                for i in range(len(labels)):
+                    output[labels[i]] = elem[i]
+
+                output_list.append(output)
+            if output_list == []:
+                return {}
+            return output_list
+    
+    except Exception as e:
+        print(e)
