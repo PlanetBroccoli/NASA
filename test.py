@@ -32,7 +32,7 @@ if __name__ == "__main__":
             for week in range(1, 54):
                 for station in stations:
                     data = calculate.calculateWeeklyData(
-                        queries.getWeeklyData(year, week, station))
+                        queries.getDataForTheWeek(year, week, station))
                     print(data)
                     outp.write(str(year) + "," + str(week) +
                                "," + station + "," + "".join(str(data).replace(")", "").replace("(", "")) + "\n")

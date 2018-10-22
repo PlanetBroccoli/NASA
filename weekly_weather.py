@@ -58,30 +58,54 @@ def processWeeklyData():
                         print(output)
 
 
-def findStations():
-    with open("21100655_output", "w", encoding="utf-8") as outp:
-        with open("input.csv", "r", encoding="utf-8") as inp:
-            try:
-                s = set()
-                for line in inp:
-                    year, week, city, district = line.split(",")[:4]
+def groupCases():
+    with open("input.csv", "r", encoding="utf-8") as inp:
+        try:
+            output = {}
+            for line in inp:
+                line = line.replace("\n", "")
+                if line in output:
+                    output[line] += 1
+                else:
+                    output[line] = 1
 
+            with open("grouped.csv", "w", encoding="utf-8") as outp:
+                for key, value in output.items():
+                    outp.write(key + str(value) + "\n")
+
+        except Exception as e:
+            print(e)
+
+
+def grabMiscData():
+    with open("21100852_output.csv", "w", encoding="utf-8") as outp:
+        with open("grouped.csv", "r", encoding="utf-8") as inp:
+            try:
+                for line in inp:
+                    year, week, city, district = line.split(",")[0:4]
+
+                    other_data = queries.getOtherData(city, district, "zh")
+                    pop_data = queries.getPopulationData(city, district, "zh")
                     station = queries.getStation(city, district, "zh")
                     weekly_data = queries.getWeeklyData(
                         year, week, station["station"])
 
-                    s.add(station["station"])
                     if len(weekly_data) > 0:
-                        print(weekly_data)
-                        data = ",".join([str(i) for i in weekly_data.values()])
-                        outp.write(data + "\n")
+                        o_data = ",".join([str(i)
+                                           for i in other_data.values()])
+                        p_data = ",".join([str(i) for i in pop_data.values()])
+                        w_data = ",".join([str(i)
+                                           for i in weekly_data.values()])
+
+                        outp.write(line.replace("\n", "") + "," + o_data + "," +
+                                   p_data + "," + w_data + "\n")
+
             except Exception as e:
                 print(e)
 
-            finally:
-                print(s)
-
 
 if __name__ == "__main__":
-    findStations()
+    # groupCases()
+    # findStations()
     # print(queries.getWeeklyData(2015, 46, 'C0R170'))
+    grabMiscData()

@@ -13,20 +13,22 @@ def calculateCoords(lat, lon):
 
         return city, district, prob
 
-def calculateProbability(params):
+def calculateProbability(params, model="simple"):
     try:
-        values = [params["pressure"], params["temperature"], params["max_temperature"], params["min_temperature"], params["humidity"], params["wind_speed"], params["max_gust"], params["precipitation"]]
-        values = [i if i > -99 else 0 for i in values]
-        print (values)
-        # This will be our calculation from logistic regression in R
-        # Without intercept
-        prediction_matrix = [-0.006946, 0.146294, -0.224428,
-                             0.180175, 0.060302, 0.417116, 0.01195, -0.01588]
+        if model == "simple":
+            values = [params["pressure"], params["temperature"], params["max_temperature"], params["min_temperature"], params["humidity"], params["wind_speed"], params["max_gust"], params["precipitation"]]
+            values = [i if i > -99 else 0 for i in values]
+            print (values)
+            # This will be our calculation from logistic regression in R
+            # Without intercept
+            prediction_matrix = [-0.006946, 0.146294, -0.224428,
+                                0.180175, 0.060302, 0.417116, 0.01195, -0.01588]
 
-        # With intercept
-        # prediction_matrix = [-116.945965, 0.146294, -0.224428, 0.180175, 0.060302, 0.417116, 0.01195, -0.01588, -0.007374]
-        # values = [1] + values
-
+            # With intercept
+            # prediction_matrix = [-116.945965, 0.146294, -0.224428, 0.180175, 0.060302, 0.417116, 0.01195, -0.01588, -0.007374]
+            # values = [1] + values
+        else:
+            return 
         y = np.dot(prediction_matrix, values)
 
         # Probability of being High-Risk

@@ -7,8 +7,8 @@ import sys
 def getData(line):
     line = line.split(",")
 
-    # City, District
-    return line[1], line[2], line[3], line[4]
+    # Year, Week, City, District
+    return line[0:4]
 
 
 if __name__ == "__main__":
@@ -20,17 +20,16 @@ if __name__ == "__main__":
         with open(out_file, "w", encoding="utf-8") as outp:
             for line in inp:
                 try:
-                    print(getData(line))
+                    line = line.replace("\n", "")
                     year, week, city, district = getData(line)
-
-                    station = queries.getStation(
-                        city, district, language="zh")["station"]
-
-                    content = line.replace("\n", "") + "," + station + "\n"
+                    station = queries.getStation(city, district, language="zh")[
+                        "station"].replace("\n", "")
+                    print(queries.getStation(city, district, language="zh"))
+                    print(city, district, station)
+                    data = queries.getWeeklyData(year, week, station)
+                    content = line + "," + \
+                        ",".join([str(data[i]) for i in data]) + "\n"
                     print(content)
-                    #data = queries.getWeeklyData(year, week, station)
-                    #content = [data[i] for i in data]
-                    #outp.write(line + "," + ",".join(content))
                     outp.write(content)
 
                 except Exception as e:

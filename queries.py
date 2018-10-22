@@ -78,6 +78,30 @@ def getLatestWeather(city, district, language="en"):
         print(e)
 
 
+def getOtherData(city, district, language="en"):
+    try:
+        district_languages = {"en": "district_en", "zh": "district"}
+        city_languages = {"en": "city_en", "zh": "city"}
+
+        district_lang, city_lang = district_languages[language], city_languages[language]
+        database = "districts"
+        condition = "`%s` LIKE '%s' AND `%s` LIKE '%s'" % (
+            city_lang, city, district_lang, district)
+
+        query = "SELECT `total_housing`, `single_level`, `low_rise`, `mid_rise`, `high_rise`, `unoccupied`, `occupied`, `person_one`, `person_two`, `person_three`, `person_four`, `person_five`, `person_six`, `person_avg`, `age_forty`, `age_thirty`, `age_twenty`, `age_ten`, `age_zero`, `cultivated_land`, `forest`, `landfill` FROM %s WHERE %s" % (database, condition)
+
+        mycursor.execute(query)
+
+        # Population, Males, Females, Area, Population Density, Type
+        data_labels = ["total_housing", "single_level", "low_rise", "mid_rise", "high_rise", "unoccupied", "occupied", "person_one", "person_two", "person_three", "person_four", "person_five", "person_six", "person_avg", "age_forty", "age_thirty", "age_twenty", "age_ten", "age_zero", "cultivated_land", "forest", "landfill"]
+        data = mycursor.fetchall()
+
+        return generateDictionary(data, data_labels)
+    
+    except Exception as e:
+        print(e)
+
+
 def getPopulationData(city, district, language="en"):
     try:
         district_languages = {"en": "district_en", "zh": "district"}
@@ -157,10 +181,10 @@ def getWeeklyData(year, week, station):
 
         condition = "`%s` = '%s' AND `%s` = '%s' AND `%s` LIKE '%s'" % (
             year_column, year, week_column, week, station_column, station)
-        query = "SELECT * FROM %s WHERE %s" % (database, condition)
+        query = "SELECT `pressure`, `max_pressure`, `min_pressure`, `temperature`, `max_temperature`, `min_temperature`,`humidity`, `min_humidity`, `wind_speed`, `max_gust`, `precipitation` FROM %s WHERE %s" % (database, condition)
         mycursor.execute(query)
         
-        data_labels = ["id", "year", "week", "station_name", "pressure", "max_pressure", "min_pressure", "temperature", "max_temperature",
+        data_labels = ["pressure", "max_pressure", "min_pressure", "temperature", "max_temperature",
                        "min_temperature", "humidity", "min_humidity", "wind_speed", "max_gust", "precipitation"]
         data = mycursor.fetchall()
         return generateDictionary(data, data_labels)
